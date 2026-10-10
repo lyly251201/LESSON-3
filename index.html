@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gấu Trúc Săn Từ Vựng HSK4</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & Nunito -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+SC:wght@500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti for winning celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Nunito', 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #fce7f3 0%, #e0f2fe 100%);
+            min-height: 100vh;
+        }
+        .chinese-font {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        .panda-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .word-chip {
+            transition: all 0.2s ease;
+            cursor: grab;
+            user-select: none;
+        }
+        .word-chip:active {
+            cursor: grabbing;
+        }
+        .drop-zone {
+            transition: all 0.2s ease;
+        }
+        .drop-zone.drag-over {
+            background-color: #fbcfe8;
+            border-color: #db2777;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="text-slate-700 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center shadow-inner panda-float">
+                    <span class="text-2xl">🐼</span>
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-lg sm:text-xl text-slate-800 flex items-center gap-2">
+                        Gấu Trúc Săn Từ Vựng <span class="text-xs bg-pink-500 text-white px-2 py-0.5 rounded-full font-bold">HSK 4</span>
+                    </h1>
+                    <p class="text-xs text-slate-500">Luyện điền từ chỗ trống thông minh & thú vị</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-star text-amber-500"></i>
+                    <span id="score-display">0</span> điểm
+                </div>
+                <button onclick="resetGame()" class="bg-pink-100 hover:bg-pink-200 text-pink-700 p-2 rounded-full transition shadow-sm" title="Chơi lại">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-3xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-center">
+
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="bg-white/90 backdrop-blur rounded-3xl p-6 sm:p-10 shadow-xl border border-white/55 text-center transition-all">
+            <div class="w-24 h-24 bg-pink-50 mx-auto rounded-full flex items-center justify-center text-5xl mb-4 panda-float shadow-inner">
+                🎋🐼
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2">Chào mừng đến với Rừng Trúc HSK4!</h2>
+            <p class="text-slate-600 mb-6 text-sm sm:text-base max-w-md mx-auto">
+                Hãy giúp chú gấu trúc điền các từ vựng chính xác vào các câu văn mô phỏng đề thi HSK4 thật chuẩn xác nhé.
+            </p>
+
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 text-left max-w-md mx-auto text-xs sm:text-sm text-amber-900">
+                <p class="font-bold mb-1 flex items-center gap-1"><i class="fa-solid fa-circle-info text-amber-600"></i> Hướng dẫn cách chơi:</p>
+                <ul class="list-disc list-inside space-y-1 text-amber-800">
+                    <li>Kéo thả từ vựng hoặc bấm chọn từ rồi bấm vào chỗ trống.</li>
+                    <li>Có thể xem Gợi ý nghĩa tiếng Việt ở mỗi câu.</li>
+                    <li>Hoàn thành xuất sắc để nhận pháo hoa chúc mừng!</li>
+                </ul>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="startLevel(1)" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-pink-500/30 transition transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-play mr-2"></i> Phần 1 (5 câu)
+                </button>
+                <button onclick="startLevel(2)" class="bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white font-bold py-3 px-8 rounded-2xl shadow-lg shadow-sky-500/30 transition transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-play mr-2"></i> Phần 2 (5 câu)
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden flex flex-col space-y-6">
+            <!-- Level info & Progress -->
+            <div class="flex justify-between items-center bg-white/70 backdrop-blur px-4 py-2.5 rounded-2xl shadow-sm border border-white">
+                <div class="flex items-center gap-2">
+                    <span id="level-title-badge" class="bg-pink-500 text-white text-xs font-bold px-2.5 py-1 rounded-lg">Phần 1</span>
+                    <span class="text-sm font-semibold text-slate-600">Câu <span id="current-q-num">1</span> / <span id="total-q-num">5</span></span>
+                </div>
+                <div class="w-32 bg-slate-200 h-2 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="bg-pink-500 h-full transition-all duration-300" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-pink-50 text-pink-500 px-4 py-1.5 rounded-bl-2xl text-xs font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-book-open"></i> HSK 4 Vocabulary
+                </div>
+
+                <div class="mb-6 mt-2">
+                    <p class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-2">Điền từ thích hợp vào chỗ trống:</p>
+                    <div id="question-text" class="text-xl sm:text-2xl font-bold text-slate-800 chinese-font leading-relaxed tracking-wide">
+                        <!-- Dynamic Question Text -->
+                    </div>
+                </div>
+
+                <!-- Drop Slot -->
+                <div class="mb-6">
+                    <div class="text-xs font-bold text-slate-500 mb-1">Vị trí điền từ:</div>
+                    <div id="drop-slot" class="drop-zone border-2 border-dashed border-pink-300 bg-pink-50/50 rounded-2xl p-4 text-center min-h-[64px] flex items-center justify-center text-pink-600 font-bold text-lg chinese-font cursor-pointer shadow-inner" ondragover="allowDrop(event)" ondragleave="removeDropStyle(event)" ondrop="dropWord(event)">
+                        <span id="slot-placeholder" class="text-slate-400 font-normal text-sm">Kéo từ vựng vào đây hoặc bấm chọn ở dưới 👇</span>
+                    </div>
+                </div>
+
+                <!-- Word Bank (Chips) -->
+                <div class="mb-6">
+                    <div class="text-xs font-bold text-slate-500 mb-2">Kho từ vựng sẵn có (Kéo hoặc bấm):</div>
+                    <div id="word-bank" class="flex flex-wrap gap-2.5">
+                        <!-- Dynamic Word Chips -->
+                    </div>
+                </div>
+
+                <!-- Feedback & Hint Box -->
+                <div id="feedback-box" class="hidden rounded-2xl p-4 mb-4 text-sm font-medium transition-all">
+                    <!-- Dynamic Feedback -->
+                </div>
+
+                <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                    <button onclick="toggleHint()" class="text-xs text-sky-600 hover:text-sky-700 font-bold flex items-center gap-1 bg-sky-50 px-3 py-2 rounded-xl transition">
+                        <i class="fa-solid fa-lightbulb"></i> <span id="hint-btn-text">Xem nghĩa tiếng Việt</span>
+                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="clearCurrentSlot()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition">
+                            Xóa chọn
+                        </button>
+                        <button id="submit-btn" onclick="checkAnswer()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-md shadow-pink-500/20 text-sm transition">
+                            Kiểm tra đáp án
+                        </button>
+                        <button id="next-btn" onclick="nextQuestion()" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-md shadow-emerald-500/20 text-sm transition">
+                            Câu tiếp theo <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hidden Vietnamese Meaning Box -->
+                <div id="hint-content" class="hidden mt-4 p-3 bg-sky-50/80 border border-sky-100 rounded-xl text-xs sm:text-sm text-sky-900">
+                    <span class="font-bold">🇻🇳 Nghĩa tiếng Việt:</span> <span id="vietnamese-meaning-text"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div id="complete-screen" class="hidden bg-white/90 backdrop-blur rounded-3xl p-6 sm:p-10 shadow-xl border border-white text-center">
+            <div class="w-24 h-24 bg-amber-50 mx-auto rounded-full flex items-center justify-center text-5xl mb-4 panda-float shadow-inner">
+                🏆🎉
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2">Chúc Mừng Bạn Đã Hoàn Thành!</h2>
+            <p id="completion-message" class="text-slate-600 mb-6 text-sm sm:text-base">
+                Bạn đã hoàn thành bài luyện tập từ vựng HSK4. Dưới đây là kết quả chi tiết của bạn:
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 max-w-md mx-auto">
+                <div class="bg-pink-50 rounded-2xl p-4 border border-pink-100 text-center">
+                    <div class="text-xs uppercase tracking-wider text-pink-500 font-bold mb-1">Tổng điểm</div>
+                    <div id="final-score" class="text-3xl font-extrabold text-pink-600">0</div>
+                    <div class="text-xs text-slate-400 mt-1">trên tổng số 50 điểm</div>
+                </div>
+                <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 text-center">
+                    <div class="text-xs uppercase tracking-wider text-emerald-600 font-bold mb-1">Số câu đúng</div>
+                    <div id="final-correct-count" class="text-3xl font-extrabold text-emerald-600">5/5</div>
+                    <div class="text-xs text-slate-400 mt-1">chính xác</div>
+                </div>
+            </div>
+
+            <!-- Detailed Mistakes Review Section -->
+            <div id="mistakes-review-container" class="hidden mb-6 text-left max-w-lg mx-auto">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-clipboard-list text-rose-500 text-base"></i>
+                    <h3 class="font-extrabold text-slate-800 text-sm sm:text-base">Thống kê các câu làm sai / chưa chính xác:</h3>
+                </div>
+                <div id="mistakes-list" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+                    <!-- Dynamic mistake cards populated via JS -->
+                </div>
+            </div>
+
+            <!-- Perfect Score Congratulation Badge -->
+            <div id="perfect-score-badge" class="hidden bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-4 mb-6 text-sm font-bold flex items-center justify-center gap-2 max-w-md mx-auto">
+                <i class="fa-solid fa-medal text-amber-500 text-xl"></i> Tuyệt vời! Bạn đã trả lời đúng tất cả các câu hỏi mà không sai câu nào!
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="resetGame()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-6 rounded-2xl transition">
+                    <i class="fa-solid fa-house mr-2"></i> Về màn hình chính
+                </button>
+                <button onclick="switchLevel()" id="switch-level-btn" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3 px-6 rounded-2xl shadow-lg shadow-pink-500/30 transition">
+                    Làm phần tiếp theo <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="text-center py-4 text-xs text-slate-400">
+        Gấu Trúc Săn Từ Vựng HSK4 • Học tiếng Trung mỗi ngày cùng Gấu Trúc 🐼
+    </footer>
+
+    <script>
+        // Data derived from the two provided HSK4 exercise documents
+        const levelsData = {
+            1: [
+                {
+                    id: 1,
+                    words: ["紧张", "提供", "符合", "安排", "判断"],
+                    correct: "符合",
+                    text: "他们这次招聘的要求虽然高，但是那些要求你都 <span id='blank-target' class='border-b-2 border-pink-500 px-3 py-0.5 text-pink-600 bg-pink-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span>，你应该去试试。",
+                    meaning: "Dù yêu cầu tuyển dụng lần này của họ rất cao, nhưng những yêu cầu đó bạn đều <b>phù hợp</b>, bạn nên đi thử xem sao.",
+                    pinyin: "Tāmen zhècì zhàopìn de yàoqiú suīrán gāo, dànshì nàxiē yàoqiú nǐ dōu fúhé, nǐ yīnggāi qù shìshi."
+                },
+                {
+                    id: 2,
+                    words: ["紧张", "提供", "符合", "安排", "判断"],
+                    correct: "判断",
+                    text: "看一个人怎么说话，常可以比较容易地 <span id='blank-target' class='border-b-2 border-pink-500 px-3 py-0.5 text-pink-600 bg-pink-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 出他是一个什么样的。<span class='text-xs text-slate-400 font-normal'>(Note: ảnh tài liệu có chữ 人)</span>",
+                    meaning: "Nhìn cách một người nói chuyện, thường có thể tương đối dễ dàng <b>phán đoán</b> ra anh ta là một người như thế nào.",
+                    pinyin: "Kàn yí gè rén zěnme shuōhuà, cháng kěyǐ bǐjiào róngyì de pànduàn chū tā shì yí gè shénme yàng de rén."
+                },
+                {
+                    id: 3,
+                    words: ["紧张", "提供", "符合", "安排", "判断"],
+                    correct: "紧张",
+                    text: "第一次跟女朋友见面的时候，他 <span id='blank-target' class='border-b-2 border-pink-500 px-3 py-0.5 text-pink-600 bg-pink-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 得脸和耳朵都红了。",
+                    meaning: "Lần đầu tiên gặp mặt bạn gái, anh ấy <b>căng thẳng</b> đến mức mặt và tai đều đỏ bừng lên.",
+                    pinyin: "Dì yī cì gēn nǚpéngyou jiànmiàn de shíhou, tā jǐnzhāng de liǎn hé ěrduo dōu hóng le."
+                },
+                {
+                    id: 4,
+                    words: ["紧张", "提供", "符合", "安排", "判断"],
+                    correct: "安排",
+                    text: "她想借这次机会去长城看看，可是公司的事情很多，时间 <span id='blank-target' class='border-b-2 border-pink-500 px-3 py-0.5 text-pink-600 bg-pink-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 得 很紧张。 <span class='text-xs text-slate-400 font-normal'>(hoặc bận rộn)</span>",
+                    meaning: "Cô ấy muốn nhân cơ hội này đi thăm Vạn Lý Trường Thành, nhưng công việc công ty rất nhiều, thời gian <b>sắp xếp</b> rất căng thẳng / gấp gáp.",
+                    pinyin: "Tā xiǎng jiè zhè cì jīhuì qù Chángchéng kànkan, kěshì gōngsī de shìqing hěnduō, shíjiān ānpái de hěn jǐnzhāng."
+                },
+                {
+                    id: 5,
+                    words: ["紧张", "提供", "符合", "安排", "判断"],
+                    correct: "提供",
+                    text: "这里 <span id='blank-target' class='border-b-2 border-pink-500 px-3 py-0.5 text-pink-600 bg-pink-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 的工作机会是最多的，每天都有很多公司在上面发招聘通知。",
+                    meaning: "Cơ hội việc làm được <b>cung cấp</b> ở đây là nhiều nhất, mỗi ngày đều có rất nhiều công ty đăng thông báo tuyển dụng.",
+                    pinyin: "Zhè lǐ tígōng de gōngzuò jīhuì shì zuì duō de, měitiān dōu yǒu hěnduō gōngsī zài shàngmiàn fā zhàopìn tōngzhī."
+                }
+            ],
+            2: [
+                {
+                    id: 1,
+                    words: ["改变", "准时", "不管", "判断", "约会"],
+                    correct: "约会",
+                    text: "今天迈克穿得很帅，因为他晚上要和女朋友 <span id='blank-target' class='border-b-2 border-sky-500 px-3 py-0.5 text-sky-600 bg-sky-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span>。",
+                    meaning: "Hôm nay Mike ăn mặc rất bảnh bao, bởi vì tối nay anh ấy phải đi <b>hẹn hò</b> với bạn gái.",
+                    pinyin: "Jīntiān Màikè chuān de hěn shuài, yīnwèi tā wǎnshang yào hé nǚpéngyou yuēhuì."
+                },
+                {
+                    id: 2,
+                    words: ["改变", "准时", "不管", "判断", "约会"],
+                    correct: "判断",
+                    text: "有时候，我们很难 <span id='blank-target' class='border-b-2 border-sky-500 px-3 py-0.5 text-sky-600 bg-sky-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 你喜欢的人是不是也喜欢你。",
+                    meaning: "Đôi khi, chúng ta rất khó <b>phán đoán</b> người bạn thích có thích bạn hay không.",
+                    pinyin: "Yǒushíhou, wǒmen hěn nán pànduàn nǐ xǐhuan de rén shì bú shì yě xǐhuan nǐ."
+                },
+                {
+                    id: 3,
+                    words: ["改变", "准时", "不管", "判断", "约会"],
+                    correct: "改变",
+                    text: "如果你想 <span id='blank-target' class='border-b-2 border-sky-500 px-3 py-0.5 text-sky-600 bg-sky-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 现在的生活，那你一定要努力工作。",
+                    meaning: "Nếu bạn muốn <b>thay đổi</b> cuộc sống hiện tại, vậy thì bạn nhất định phải nỗ lực làm việc.",
+                    pinyin: "Rúguǒ nǐ xiǎng gǎibiàn xiànzài de shēnghuó, nà nǐ yídìng yào nǔlì gōngzuò."
+                },
+                {
+                    id: 4,
+                    words: ["改变", "准时", "不管", "判断", "约会"],
+                    correct: "准时",
+                    text: "明天下午两点开会，请大家 <span id='blank-target' class='border-b-2 border-sky-500 px-3 py-0.5 text-sky-600 bg-sky-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 参加。",
+                    meaning: "Chiều mai 2 giờ họp, xin mọi người tham gia <b>đúng giờ</b>.",
+                    pinyin: "Míngtiān xiàwǔ liǎng diǎn kāihuì, qǐng dàjiā zhǔnshí cānjiā."
+                },
+                {
+                    id: 5,
+                    words: ["改变", "准时", "不管", "判断", "约会"],
+                    correct: "不管",
+                    text: "<span id='blank-target' class='border-b-2 border-sky-500 px-3 py-0.5 text-sky-600 bg-sky-50 rounded mx-1 inline-block min-w-[80px] text-center'>（  ）</span> 明天下不下雨，我都得上班。",
+                    meaning: "<b>Cho dù / Bất kể</b> ngày mai trời có mưa hay không, tôi đều phải đi làm.",
+                    pinyin: "Bùguǎn míngtiān xià bú xià yǔ, wǒ dōu děi shàngbān."
+                }
+            ]
+        };
+
+        let currentLevel = 1;
+        let currentIndex = 0;
+        let score = 0;
+        let userMistakes = []; // Array to track incorrect answers
+        let selectedWord = null;
+        let currentDroppedWord = null;
+        let answered = false;
+
+        function startLevel(lvl) {
+            currentLevel = lvl;
+            currentIndex = 0;
+            score = 0;
+            userMistakes = [];
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('complete-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            document.getElementById('level-title-badge').innerText = `Phần ${lvl}`;
+            document.getElementById('score-display').innerText = '0';
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            selectedWord = null;
+            currentDroppedWord = null;
+
+            const qData = levelsData[currentLevel][currentIndex];
+            document.getElementById('current-q-num').innerText = currentIndex + 1;
+            document.getElementById('total-q-num').innerText = levelsData[currentLevel].length;
+            document.getElementById('question-text').innerHTML = qData.text;
+            
+            // Progress bar
+            const percent = ((currentIndex) / levelsData[currentLevel].length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            // Reset slot
+            const slot = document.getElementById('drop-slot');
+            slot.innerHTML = `<span id="slot-placeholder" class="text-slate-400 font-normal text-sm">Kéo từ vựng vào đây hoặc bấm chọn ở dưới 👇</span>`;
+            slot.className = "drop-zone border-2 border-dashed border-pink-300 bg-pink-50/50 rounded-2xl p-4 text-center min-h-[64px] flex items-center justify-center text-pink-600 font-bold text-lg chinese-font cursor-pointer shadow-inner";
+
+            // Render word chips (shuffle them for fun)
+            const shuffledWords = [...qData.words].sort(() => Math.random() - 0.5);
+            const wordBankEl = document.getElementById('word-bank');
+            wordBankEl.innerHTML = '';
+
+            shuffledWords.forEach(word => {
+                const chip = document.createElement('div');
+                chip.className = "word-chip bg-white border-2 border-pink-200 text-pink-700 font-bold px-4 py-2 rounded-xl shadow-sm hover:border-pink-400 hover:bg-pink-50 text-base chinese-font";
+                chip.draggable = true;
+                chip.innerText = word;
+                
+                // Drag events
+                chip.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', word);
+                });
+
+                // Click event for mobile / tap selection
+                chip.addEventListener('click', () => {
+                    if (answered) return;
+                    // Remove selected state from others
+                    document.querySelectorAll('.word-chip').forEach(c => c.classList.remove('ring-4', 'ring-pink-300', 'bg-pink-100'));
+                    chip.classList.add('ring-4', 'ring-pink-300', 'bg-pink-100');
+                    selectedWord = word;
+                    placeWordInSlot(word);
+                });
+
+                wordBankEl.appendChild(chip);
+            });
+
+            // Hide feedback and hint
+            document.getElementById('feedback-box').classList.add('hidden');
+            document.getElementById('hint-content').classList.add('hidden');
+            document.getElementById('hint-btn-text').innerText = "Xem nghĩa tiếng Việt";
+            document.getElementById('submit-btn').classList.remove('hidden');
+            document.getElementById('next-btn').classList.add('hidden');
+        }
+
+        // Drag and Drop handlers
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.currentTarget.classList.add('drag-over');
+        }
+
+        function removeDropStyle(ev) {
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function dropWord(ev) {
+            ev.preventDefault();
+            if (answered) return;
+            const word = ev.dataTransfer.getData('text/plain');
+            if (word) {
+                placeWordInSlot(word);
+            }
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function placeWordInSlot(word) {
+            currentDroppedWord = word;
+            const slot = document.getElementById('drop-slot');
+            slot.innerHTML = `<span class="chinese-font text-xl text-pink-700 font-extrabold animate-pulse">${word}</span>`;
+            slot.classList.remove('border-pink-300', 'bg-pink-50/50');
+            slot.classList.add('border-pink-500', 'bg-pink-100');
+
+            // Also update the blank spot in sentence preview
+            const blankTarget = document.getElementById('blank-target');
+            if (blankTarget) {
+                blankTarget.innerText = word;
+            }
+        }
+
+        function clearCurrentSlot() {
+            if (answered) return;
+            currentDroppedWord = null;
+            selectedWord = null;
+            document.querySelectorAll('.word-chip').forEach(c => c.classList.remove('ring-4', 'ring-pink-300', 'bg-pink-100'));
+            
+            const slot = document.getElementById('drop-slot');
+            slot.innerHTML = `<span id="slot-placeholder" class="text-slate-400 font-normal text-sm">Kéo từ vựng vào đây hoặc bấm chọn ở dưới 👇</span>`;
+            slot.className = "drop-zone border-2 border-dashed border-pink-300 bg-pink-50/50 rounded-2xl p-4 text-center min-h-[64px] flex items-center justify-center text-pink-600 font-bold text-lg chinese-font cursor-pointer shadow-inner";
+
+            const blankTarget = document.getElementById('blank-target');
+            if (blankTarget) {
+                blankTarget.innerText = "（  ）";
+            }
+        }
+
+        function checkAnswer() {
+            if (!currentDroppedWord) {
+                alertBox("Vui lòng chọn hoặc kéo một từ vựng vào chỗ trống trước nhé!");
+                return;
+            }
+
+            answered = true;
+            const qData = levelsData[currentLevel][currentIndex];
+            const feedbackBox = document.getElementById('feedback-box');
+            feedbackBox.classList.remove('hidden');
+
+            if (currentDroppedWord === qData.correct) {
+                score += 10;
+                document.getElementById('score-display').innerText = score;
+                feedbackBox.className = "rounded-2xl p-4 mb-4 text-sm font-medium bg-emerald-50 border border-emerald-200 text-emerald-800";
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 mr-1.5 text-base"></i> <b>Chính xác! (+10 điểm)</b> Chú gấu trúc rất vui vì bạn đã điền đúng từ.`;
+            } else {
+                // Record mistake details
+                userMistakes.push({
+                    questionNumber: currentIndex + 1,
+                    text: qData.text.replace(/<[^>]*>/g, ''), // Strip html for cleaner display
+                    correct: qData.correct,
+                    chosen: currentDroppedWord,
+                    meaning: qData.meaning
+                });
+
+                feedbackBox.className = "rounded-2xl p-4 mb-4 text-sm font-medium bg-rose-50 border border-rose-200 text-rose-800";
+                feedbackBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600 mr-1.5 text-base"></i> <b>Chưa chính xác! (0 điểm)</b> Đáp án đúng phải là <span class="font-bold underline">${qData.correct}</span>.`;
+            }
+
+            // Show hint / meaning automatically on submit
+            const hintContent = document.getElementById('hint-content');
+            document.getElementById('vietnamese-meaning-text').innerHTML = `${qData.meaning} <br><i class="text-xs text-sky-700">Pinyin: ${qData.pinyin}</i>`;
+            hintContent.classList.remove('hidden');
+
+            document.getElementById('submit-btn').classList.add('hidden');
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < levelsData[currentLevel].length) {
+                loadQuestion();
+            } else {
+                showCompletionScreen();
+            }
+        }
+
+        function showCompletionScreen() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('complete-screen').classList.remove('hidden');
+            
+            const totalQuestions = levelsData[currentLevel].length;
+            const correctCount = totalQuestions - userMistakes.length;
+            
+            document.getElementById('final-score').innerText = `${score}`;
+            document.getElementById('final-correct-count').innerText = `${correctCount}/${totalQuestions}`;
+
+            const mistakesContainer = document.getElementById('mistakes-review-container');
+            const mistakesList = document.getElementById('mistakes-list');
+            const perfectBadge = document.getElementById('perfect-score-badge');
+
+            if (userMistakes.length > 0) {
+                mistakesContainer.classList.remove('hidden');
+                perfectBadge.classList.add('hidden');
+                mistakesList.innerHTML = '';
+
+                userMistakes.forEach(m => {
+                    const item = document.createElement('div');
+                    item.className = "bg-rose-50/70 border border-rose-200 rounded-2xl p-3 text-xs sm:text-sm text-rose-900";
+                    item.innerHTML = `
+                        <div class="font-bold text-rose-700 mb-1">Câu ${m.questionNumber}:</div>
+                        <div class="text-slate-700 mb-1.5 italic chinese-font">"${m.text}"</div>
+                        <div class="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-rose-200/60">
+                            <div><span class="text-slate-500">Bạn chọn:</span> <span class="font-bold text-rose-600">${m.chosen}</span></div>
+                            <div><span class="text-slate-500">Đáp án đúng:</span> <span class="font-bold text-emerald-600">${m.correct}</span></div>
+                        </div>
+                    `;
+                    mistakesList.appendChild(item);
+                });
+            } else {
+                mistakesContainer.classList.add('hidden');
+                perfectBadge.classList.remove('hidden');
+            }
+
+            // Trigger celebratory confetti
+            confetti({
+                particleCount: 120,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            const switchBtn = document.getElementById('switch-level-btn');
+            if (currentLevel === 1) {
+                switchBtn.innerHTML = `Làm phần 2 <i class="fa-solid fa-arrow-right ml-2"></i>`;
+                switchBtn.onclick = () => startLevel(2);
+                document.getElementById('completion-message').innerText = "Tuyệt vời! Bạn đã hoàn thành Phần 1. Sẵn sàng chinh phục Phần 2 chưa?";
+            } else {
+                switchBtn.innerHTML = `Làm lại từ đầu <i class="fa-solid fa-rotate-right ml-2"></i>`;
+                switchBtn.onclick = () => startLevel(1);
+                document.getElementById('completion-message').innerText = "Xuất sắc! Bạn đã hoàn thành toàn bộ các phần luyện tập HSK4!";
+            }
+        }
+
+        function switchLevel() {
+            if (currentLevel === 1) {
+                startLevel(2);
+            } else {
+                startLevel(1);
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('welcome-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('complete-screen').classList.add('hidden');
+            score = 0;
+            userMistakes = [];
+            document.getElementById('score-display').innerText = '0';
+        }
+
+        function toggleHint() {
+            const hint = document.getElementById('hint-content');
+            const btnText = document.getElementById('hint-btn-text');
+            const qData = levelsData[currentLevel][currentIndex];
+            
+            document.getElementById('vietnamese-meaning-text').innerHTML = `${qData.meaning} <br><i class="text-xs text-sky-700">Pinyin: ${qData.pinyin}</i>`;
+
+            if (hint.classList.contains('hidden')) {
+                hint.classList.remove('hidden');
+                btnText.innerText = "Ẩn nghĩa tiếng Việt";
+            } else {
+                hint.classList.add('hidden');
+                btnText.innerText = "Xem nghĩa tiếng Việt";
+            }
+        }
+
+        function alertBox(msg) {
+            const feedbackBox = document.getElementById('feedback-box');
+            feedbackBox.classList.remove('hidden');
+            feedbackBox.className = "rounded-2xl p-4 mb-4 text-sm font-medium bg-amber-50 border border-amber-200 text-amber-800";
+            feedbackBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1.5 text-base"></i> ${msg}`;
+        }
+    </script>
+</body>
+</html>
